@@ -3,9 +3,12 @@
 Intégration Home Assistant pour récupérer les informations de marée et de météo marine.
 
 ## Version actuelle
-**v2.1.10** - Retry avec tenacity, exceptions métier, logging structuré
+**v2.1.11** - Prévisions de marée conservées en cas de panne du flux live
 
 ## 📝 Changelog
+
+### v2.1.11
+- 🌊 **Résilience des marées** : Une erreur du flux MeteoMarineLive ne rend plus indisponibles les horaires de marée et les prévisions déjà récupérés.
 
 ### v2.1.10
 - 🔄 **Retry automatique** : Appels réseau avec `tenacity` — backoff exponentiel, max 3 tentatives sur erreurs transitoires (réseau, 429, 5xx) (issue #51).
