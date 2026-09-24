@@ -318,6 +318,21 @@ class TestApiMareeInfoGetInformationPort:
     """Tests for getinformationport parsing."""
 
     @pytest.mark.asyncio
+    async def test_live_feed_failure_preserves_tides(self, sjm_meteomarine_data):
+        """An optional live feed outage must not invalidate the tide forecast."""
+        api = ApiMareeInfo()
+        api.setid("190")
+        api.getjson = AsyncMock(side_effect=RuntimeError("Live feed HTTP 500"))
+
+        await api.getinformationport(jsondata=sjm_meteomarine_data, origine="MeteoMarine")
+
+        api.getjson.assert_awaited_once_with("MeteoMarineLive", session=None)
+        assert api.has_error() is False
+        assert api.get_tide_data()
+        assert api.get_forecast_data()
+        assert api._donneesPrevisLive == {}
+
+    @pytest.mark.asyncio
     async def test_parse_meteomarine_data(self, sjm_meteomarine_data):
         """Test parsing of real MeteoMarine data."""
         api = ApiMareeInfo()

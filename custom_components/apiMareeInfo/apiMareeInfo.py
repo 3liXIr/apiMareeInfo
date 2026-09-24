@@ -183,12 +183,17 @@ class ApiMareeInfo:
 
             # Fetch live data if id is available
             if self._id:
-                live_jsondata = await self.getjson("MeteoMarineLive", session=session)
-                self._donneesPrevisLive = {}
-                if live_jsondata and "content" in live_jsondata and "forecasts" in live_jsondata["content"]:
-                    for f in live_jsondata["content"]["forecasts"]:
-                        dt = datetime.datetime.fromisoformat(f["datetime"])
-                        self._donneesPrevisLive[dt.replace(tzinfo=None)] = f
+                try:
+                    live_jsondata = await self.getjson("MeteoMarineLive", session=session)
+                except Exception as err:
+                    # Live observations are optional. A failure here must not hide
+                    # the tide and hourly forecast data fetched above.
+                    _LOGGER.warning("Live marine data unavailable for port %s: %s", self._id, err)
+                else:
+                    if live_jsondata and "content" in live_jsondata and "forecasts" in live_jsondata["content"]:
+                        for f in live_jsondata["content"]["forecasts"]:
+                            dt = datetime.datetime.fromisoformat(f["datetime"])
+                            self._donneesPrevisLive[dt.replace(tzinfo=None)] = f
 
         elif origine == "stormio":
             if not jsondata or "errors" in jsondata:
